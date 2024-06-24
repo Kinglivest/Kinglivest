@@ -1,0 +1,42 @@
+import requests
+
+BOT_URL = f"https://api.telegram.org/bot{*7476720696:AAGdY_D-QnLgoJdAHFau3yyXl6vt9zdemh0*}/"
+
+
+def send_message(chat_id, text):
+  """Sends a message to the chat using Telegram Bot API"""
+  params = {"chat_id": chat_id, "text": text}
+  response = requests.post(BOT_URL + "sendMessage", params=params)
+  return response.json()
+
+def handle_command(update):
+  """Processes the incoming message based on the command"""
+  chat_id = update["message"]["chat"]["id"]
+  text = update["message"]["text"]
+  command = text.split()[0]
+
+  if command == "/start":
+    send_message(chat_id, "Hi! Welcome to my bot. Use /help for a list of commands.")
+  elif command == "/help":
+    available_commands = "/start - Starts the bot\n/help - Shows this help message\n/info - Provides bot information\n/status - Checks bot status (work in progress)"
+    send_message(chat_id, available_commands)
+  elif command == "/info":
+    bot_info = f"Bot Name: {update['message']['bot']['username']}\nBot Username: @{update['message']['bot']['username']}"
+    send_message(chat_id, bot_info)
+  elif command == "/status":
+    send_message(chat_id, "This feature is under development.")
+  else:
+    send_message(chat_id, "Unknown command. Use /help for a list of commands.")
+
+def main():
+  while True:
+    # Get updates from Telegram using the 'getUpdates' method
+    response = requests.get(BOT_URL + "getUpdates")
+    updates = response.json()["result"]
+
+    # Process each update (message)
+    for update in updates:
+      handle_command(update)
+
+if __name__ == "__main__":
+  main()
